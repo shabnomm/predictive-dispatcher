@@ -1,9 +1,9 @@
-__pycache__/
-*.pyc
+.env
+.env.*
+backend/.env
+frontend/.env
 .venv/
 venv/
 env/
-.env
-.env.*
-.DS_Store
-.streamlit/secrets.toml
+__pycache__/
+*.pyc

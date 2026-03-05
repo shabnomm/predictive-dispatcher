@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
@@ -15,7 +16,8 @@ st.set_page_config(
     layout="wide",
 )
 
-DEFAULT_API_BASE = "http://127.0.0.1:8000"
+# Default backend for deployed app (Render)
+DEFAULT_API_BASE = os.getenv("BACKEND_URL", "https://predictive-dispatcher.onrender.com")
 API_BASE = st.sidebar.text_input("Backend API Base URL", value=DEFAULT_API_BASE).rstrip("/")
 
 st.title("Predictive Field Service Dispatcher (PoC)")
@@ -248,7 +250,6 @@ with ui_col1:
                 st.success("Technician added.")
 
     if st.session_state.technicians:
-        # Display-safe table
         tech_rows = []
         for t in st.session_state.technicians:
             gps = t.get("start_gps", {}) if isinstance(t.get("start_gps", {}), dict) else {}
@@ -295,12 +296,10 @@ with ui_col2:
         vibration = st.number_input("Vibration RMS", value=1.83, format="%.2f", key="vibration_input")
         battery = st.number_input("Battery Voltage", value=13.3, format="%.1f", key="battery_input")
 
-        # Required AlertMeta in backend schemas
         duration_min = st.number_input("Anomaly duration (minutes)", min_value=0, value=10, step=1, key="duration_min")
         odometer_km = st.number_input("Odometer (km)", min_value=0, value=50000, step=100, key="odometer_km")
         vehicle_type = st.text_input("Vehicle Type", value="van", key="vehicle_type")
 
-        # Optional trend fields
         st.caption("Optional trend fields (7 points) to support 'predictive risk scoring (PoC)'.")
         temp_trend = st.text_input(
             "Engine Temp Trend (7 comma values)",
@@ -313,7 +312,6 @@ with ui_col2:
             key="fuel_trend_input",
         )
 
-        # Optional flags input (advanced)
         flags_text = st.text_input(
             "Flags (optional, comma separated e.g. HIGH_ENGINE_TEMP,FUEL_SPIKE)",
             value="",
@@ -343,7 +341,6 @@ with ui_col2:
                             "fuel_rate_lph": float(fuel_rate),
                             "vibration_rms": float(vibration),
                             "battery_v": float(battery),
-                            # Trend fields (requires Sensors model support)
                             "engine_temp_trend": parse_trend(temp_trend),
                             "fuel_rate_trend": parse_trend(fuel_trend),
                         },
